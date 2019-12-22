@@ -98,6 +98,12 @@ size_t rsa_encrypt(unsigned char* outBuf, unsigned char* inBuf, size_t len,
 {
 	/* TODO: write this.  Use BYTES2Z to get integers, and then
 	 * Z2BYTES to write the output buffer. */
+
+	mpz_t in;
+    mpz_init(in);
+
+    BYTES2Z(in, inBuf, len);
+
 	return 0; /* TODO: return should be # bytes written */
 }
 size_t rsa_decrypt(unsigned char* outBuf, unsigned char* inBuf, size_t len,
