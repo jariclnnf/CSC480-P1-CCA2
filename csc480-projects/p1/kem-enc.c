@@ -72,6 +72,7 @@ int kem_encrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
     randBytes(x, leng);
     ske_keyGen(SK, x, leng);
     size_t encapLen = leng + HASHLEN;
+    if(leng != rsa_encrypt(encap, x, leng, K)) {return -1;}
 
 	return 0;
 }
