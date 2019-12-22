@@ -35,9 +35,9 @@ static const char* usage =
 #define FNLEN 255
 
 enum modes {
-	ENC,
-	DEC,
-	GEN
+    ENC,
+    DEC,
+    GEN
 };
 
 /* Let SK denote the symmetric key.  Then to format ciphertext, we
@@ -58,9 +58,9 @@ enum modes {
 
 int kem_encrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
 {
-	/* TODO: encapsulate random symmetric key (SK) using RSA and SHA256;
-	 * encrypt fnIn with SK; concatenate encapsulation and cihpertext;
-	 * write to fnOut. */
+    /* TODO: encapsulate random symmetric key (SK) using RSA and SHA256;
+     * encrypt fnIn with SK; concatenate encapsulation and cihpertext;
+     * write to fnOut. */
     
     int leng = rsa_numBytesN(K);
     unsigned char* x = malloc(leng);
@@ -79,94 +79,101 @@ int kem_encrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
     if(fdout == -1){ return -1;}
     write(fdout, encap, encapLen);
     ske_encrypt_file(fnOut, fnIn, &SK, NULL, encapLen);
-
-	return 0;
+    close(fdout);
+    
+    return 0;
 }
 
 /* NOTE: make sure you check the decapsulation is valid before continuing */
 int kem_decrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
 {
-	/* TODO: write this. */
-	/* step 1: recover the symmetric key */
-	/* step 2: check decapsulation */
-	/* step 3: derive key from ephemKey and decrypt data. */
-	return 0;
+    /* TODO: write this. */
+    /* step 1: recover the symmetric key */
+    /* step 2: check decapsulation */
+    /* step 3: derive key from ephemKey and decrypt data. */
+    unsigned char* encap = malloc(encapLen);
+    unsigned char* x = malloc(rsaLen);
+    unsigned char* h = malloc(HASHLEN);
+    unsigned char* a = encap + rsaLen;
+    
+    
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
-	/* define long options */
-	static struct option long_opts[] = {
-		{"in",      required_argument, 0, 'i'},
-		{"out",     required_argument, 0, 'o'},
-		{"key",     required_argument, 0, 'k'},
-		{"rand",    required_argument, 0, 'r'},
-		{"gen",     required_argument, 0, 'g'},
-		{"bits",    required_argument, 0, 'b'},
-		{"enc",     no_argument,       0, 'e'},
-		{"dec",     no_argument,       0, 'd'},
-		{"help",    no_argument,       0, 'h'},
-		{0,0,0,0}
-	};
-	/* process options: */
-	char c;
-	int opt_index = 0;
-	char fnRnd[FNLEN+1] = "/dev/urandom";
-	fnRnd[FNLEN] = 0;
-	char fnIn[FNLEN+1];
-	char fnOut[FNLEN+1];
-	char fnKey[FNLEN+1];
-	memset(fnIn,0,FNLEN+1);
-	memset(fnOut,0,FNLEN+1);
-	memset(fnKey,0,FNLEN+1);
-	int mode = ENC;
-	// size_t nBits = 2048;
-	size_t nBits = 1024;
-	while ((c = getopt_long(argc, argv, "edhi:o:k:r:g:b:", long_opts, &opt_index)) != -1) {
-		switch (c) {
-			case 'h':
-				printf(usage,argv[0],nBits);
-				return 0;
-			case 'i':
-				strncpy(fnIn,optarg,FNLEN);
-				break;
-			case 'o':
-				strncpy(fnOut,optarg,FNLEN);
-				break;
-			case 'k':
-				strncpy(fnKey,optarg,FNLEN);
-				break;
-			case 'r':
-				strncpy(fnRnd,optarg,FNLEN);
-				break;
-			case 'e':
-				mode = ENC;
-				break;
-			case 'd':
-				mode = DEC;
-				break;
-			case 'g':
-				mode = GEN;
-				strncpy(fnOut,optarg,FNLEN);
-				break;
-			case 'b':
-				nBits = atol(optarg);
-				break;
-			case '?':
-				printf(usage,argv[0],nBits);
-				return 1;
-		}
-	}
-
-	/* TODO: finish this off.  Be sure to erase sensitive data
-	 * like private keys when you're done with them (see the
-	 * rsa_shredKey function). */
-	switch (mode) {
-		case ENC:
-		case DEC:
-		case GEN:
-		default:
-			return 1;
-	}
-
-	return 0;
+    /* define long options */
+    static struct option long_opts[] = {
+        {"in",      required_argument, 0, 'i'},
+        {"out",     required_argument, 0, 'o'},
+        {"key",     required_argument, 0, 'k'},
+        {"rand",    required_argument, 0, 'r'},
+        {"gen",     required_argument, 0, 'g'},
+        {"bits",    required_argument, 0, 'b'},
+        {"enc",     no_argument,       0, 'e'},
+        {"dec",     no_argument,       0, 'd'},
+        {"help",    no_argument,       0, 'h'},
+        {0,0,0,0}
+    };
+    /* process options: */
+    char c;
+    int opt_index = 0;
+    char fnRnd[FNLEN+1] = "/dev/urandom";
+    fnRnd[FNLEN] = 0;
+    char fnIn[FNLEN+1];
+    char fnOut[FNLEN+1];
+    char fnKey[FNLEN+1];
+    memset(fnIn,0,FNLEN+1);
+    memset(fnOut,0,FNLEN+1);
+    memset(fnKey,0,FNLEN+1);
+    int mode = ENC;
+    // size_t nBits = 2048;
+    size_t nBits = 1024;
+    while ((c = getopt_long(argc, argv, "edhi:o:k:r:g:b:", long_opts, &opt_index)) != -1) {
+        switch (c) {
+            case 'h':
+                printf(usage,argv[0],nBits);
+                return 0;
+            case 'i':
+                strncpy(fnIn,optarg,FNLEN);
+                break;
+            case 'o':
+                strncpy(fnOut,optarg,FNLEN);
+                break;
+            case 'k':
+                strncpy(fnKey,optarg,FNLEN);
+                break;
+            case 'r':
+                strncpy(fnRnd,optarg,FNLEN);
+                break;
+            case 'e':
+                mode = ENC;
+                break;
+            case 'd':
+                mode = DEC;
+                break;
+            case 'g':
+                mode = GEN;
+                strncpy(fnOut,optarg,FNLEN);
+                break;
+            case 'b':
+                nBits = atol(optarg);
+                break;
+            case '?':
+                printf(usage,argv[0],nBits);
+                return 1;
+        }
+    }
+    
+    /* TODO: finish this off.  Be sure to erase sensitive data
+     * like private keys when you're done with them (see the
+     * rsa_shredKey function). */
+    switch (mode) {
+        case ENC:
+        case DEC:
+        case GEN:
+        default:
+            return 1;
+    }
+    
+    return 0;
 }
