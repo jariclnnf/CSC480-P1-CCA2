@@ -13,6 +13,10 @@
 #include "rsa.h"
 #include "prf.h"
 
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
+
 static const char* usage =
 "Usage: %s [OPTIONS]...\n"
 "Encrypt or decrypt data.\n\n"
@@ -57,8 +61,18 @@ int kem_encrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
 	/* TODO: encapsulate random symmetric key (SK) using RSA and SHA256;
 	 * encrypt fnIn with SK; concatenate encapsulation and cihpertext;
 	 * write to fnOut. */
-    int len = rsa_numBytesN(K);
-    chart* x = malloc(len);
+    
+    int leng = rsa_numBytesN(K);
+    unsigned char* x = malloc(leng);
+    unsigned char* encap = malloc(encapLen);
+    unsigned char* h = malloc(HASHLEN);
+    int fdout;
+    SKE_KEY SK;
+    
+    randBytes(x, leng);
+    ske_keyGen(SK, x, leng);
+    size_t encapLen = leng + HASHLEN;
+
 	return 0;
 }
 
