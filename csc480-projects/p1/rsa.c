@@ -104,11 +104,11 @@ size_t rsa_encrypt(unsigned char* outBuf, unsigned char* inBuf, size_t len,
 
     BYTES2Z(in, inBuf, len);
 
-	mpz_t outInt;
-    mpz_init(outInt);
-    mpz_powm(outInt, inInt, K->e, K->n);
+	mpz_t out;
+    mpz_init(out);
+    mpz_powm(out, in, K->e, K->n);
 
-    Z2BYTES(outBuf, len, outInt);
+    Z2BYTES(outBuf, len, out);
 
 	return len;
 
@@ -118,7 +118,20 @@ size_t rsa_decrypt(unsigned char* outBuf, unsigned char* inBuf, size_t len,
 		RSA_KEY* K)
 {
 	/* TODO: write this.  See remarks above. */
-	return 0;
+
+	mpz_t in;
+    mpz_init(in);
+
+    BYTES2Z(in, inBuf, len);
+
+    mpz_t out;
+    mpz_init(out);
+    mpz_powm(out, in, K->d, K->n);
+
+    Z2BYTES(outBuf, len, out);
+
+	return len;
+	
 }
 
 size_t rsa_numBytesN(RSA_KEY* K)
