@@ -76,20 +76,20 @@ int rsa_keyGen(size_t keyBits, RSA_KEY* K)
 
     mpz_t t;
     mpz_init(t);
-    unsigned char* tempBuf = malloc(keyBytes);
+    unsigned char* tBuf = malloc(keyBytes);
 
     mpz_t one;
     mpz_init(one); mpz_set_ui(one, 1);
 
     do{
-        randBytes(tempBuf,keyBytes);
-        BYTES2Z(K->e, tempBuf, keyBytes);
+        randBytes(tBuf,keyBytes);
+        BYTES2Z(K->e, tBuf, keyBytes);
         mpz_gcd(t, K->e, phi);
     }while (mpz_cmp(t, one));
 
     mpz_invert(K->d, K->e , phi);
 
-    free(tempBuf);
+    free(tBuf);
 	return 0;
 }
 
