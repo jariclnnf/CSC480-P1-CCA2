@@ -73,6 +73,12 @@ int kem_encrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
     ske_keyGen(SK, x, leng);
     size_t encapLen = leng + HASHLEN;
     if(leng != rsa_encrypt(encap, x, leng, K)) {return -1;}
+    SHA256(x, leng, h);
+    memcpy(encap+len, h, HASHLEN);
+    fdout = open(fnOut, O_CREAT | O_RDWR, S_IRWXU);
+    if(fdout == -1){ return -1;}
+    write(fdout, encap, encapLen);
+    
 
 	return 0;
 }
