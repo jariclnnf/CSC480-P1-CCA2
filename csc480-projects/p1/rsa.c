@@ -56,6 +56,40 @@ int rsa_keyGen(size_t keyBits, RSA_KEY* K)
 	 * the right length, and then test for primality (see the ISPRIME
 	 * macro above).  Once you've found the primes, set up the other
 	 * pieces of the key ({en,de}crypting exponents, and n=pq). */
+	size_t keyBytes = keyBits / CHAR_BIT;
+    setPrime(K->p, keyBytes);
+    setPrime(K->q, keyBytes);
+    mpz_mul(K->n, K->p, K->q);
+
+    mpz_t phi;
+	mpz_t pSub1;
+    mpz_t qSub1;
+   
+
+    mpz_init(phi);
+    mpz_init(pSub1);
+	mpz_init(qSub1);
+
+    mpz_sub_ui(pSub1, K->p, 1);
+    mpz_sub_ui(qSub1, K->q, 1);
+    mpz_mul(phi, pSub1, qSub1);
+
+    mpz_t t;
+    mpz_init(t);
+    unsigned char* tBuf = malloc(keyBytes);
+
+    mpz_t one;
+    mpz_init(one); mpz_set_ui(one, 1);
+
+    do{
+        randBytes(tBuf,keyBytes);
+        BYTES2Z(K->e, tBuf, keyBytes);
+        mpz_gcd(t, K->e, phi);
+    }while (mpz_cmp(t, one));
+
+    mpz_invert(K->d, K->e , phi);
+
+    free(tBuf);
 	return 0;
 }
 
@@ -64,13 +98,40 @@ size_t rsa_encrypt(unsigned char* outBuf, unsigned char* inBuf, size_t len,
 {
 	/* TODO: write this.  Use BYTES2Z to get integers, and then
 	 * Z2BYTES to write the output buffer. */
-	return 0; /* TODO: return should be # bytes written */
+
+	mpz_t in;
+    mpz_init(in);
+
+    BYTES2Z(in, inBuf, len);
+
+	mpz_t out;
+    mpz_init(out);
+    mpz_powm(out, in, K->e, K->n);
+
+    Z2BYTES(outBuf, len, out);
+
+	return len;
+
+	 /* TODO: return should be # bytes written */
 }
 size_t rsa_decrypt(unsigned char* outBuf, unsigned char* inBuf, size_t len,
 		RSA_KEY* K)
 {
 	/* TODO: write this.  See remarks above. */
-	return 0;
+
+	mpz_t in;
+    mpz_init(in);
+
+    BYTES2Z(in, inBuf, len);
+
+    mpz_t out;
+    mpz_init(out);
+    mpz_powm(out, in, K->d, K->n);
+
+    Z2BYTES(outBuf, len, out);
+
+	return len;
+	
 }
 
 size_t rsa_numBytesN(RSA_KEY* K)
