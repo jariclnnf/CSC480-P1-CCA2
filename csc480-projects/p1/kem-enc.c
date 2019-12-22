@@ -84,6 +84,21 @@ int kem_encrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
     return 0;
 }
 
+int _encrypt(char* fnOut, char* fnIn, char* fnKey){
+    FILE* keyFile = fopen(fnKey, "r");
+    printf("File: %s\n", fnKey);
+    if(keyFile == NULL){
+        printf("FILE LOADING FAILED! \n");
+        return -1;
+    }
+    RSA_KEY K;
+    rsa_readPublic(keyFile, &K);
+    kem_encrypt(fnOut, fnIn, &K);
+    rsa_shredKey(&K);
+    fclose(keyFile);
+    
+    return 0;
+}
 /* NOTE: make sure you check the decapsulation is valid before continuing */
 int kem_decrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
 {
@@ -96,7 +111,26 @@ int kem_decrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
     unsigned char* h = malloc(HASHLEN);
     unsigned char* a = encap + rsaLen;
     
+    size_t rsaLen = rsa_numBytesN(K);
+    size_t encapLen = rsaLen + HASHLEN;
+    size_t read = fread(encap, 1, encapLen, encrypted);
+    FILE* encrypted = fopen(fnIn, "r");
     
+    if(read != encapLen){return -1;}
+    if(rsaLen != rsa_decrypt(x, encap, rsaLen, K)){ return -1;}
+    SHA256(x, rsaLen, h);
+    
+    for(int i = 0; i < HASHLEN; i++){
+        if(*h != *a){ return -1; }
+        a++; h++;
+    }
+    
+    SKE_KEY SK;
+    ske_keyGen(&SK, x, rsaLen);
+    ske_decrypt_file(fnOut, fnIn, &SK, encapLen);
+    a = NULL;
+    
+    fclose(encrypted);
     return 0;
 }
 
