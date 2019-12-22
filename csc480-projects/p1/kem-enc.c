@@ -78,7 +78,7 @@ int kem_encrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
     fdout = open(fnOut, O_CREAT | O_RDWR, S_IRWXU);
     if(fdout == -1){ return -1;}
     write(fdout, encap, encapLen);
-    
+    ske_encrypt_file(fnOut, fnIn, &SK, NULL, encapLen);
 
 	return 0;
 }
