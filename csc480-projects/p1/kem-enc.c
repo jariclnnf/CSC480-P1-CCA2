@@ -134,6 +134,21 @@ int kem_decrypt(const char* fnOut, const char* fnIn, RSA_KEY* K)
     return 0;
 }
 
+int _decrypt(char* fnOut, char* fnIn, char* fnKey){
+    FILE* privateKey = fopen(fnKey, "r");
+    printf("File: %s\n", fnKey);
+    if(privateKey == NULL){
+        printf("FILE LOADING FAILED! \n");
+        return -1;
+    }
+    RSA_KEY K;
+    rsa_readPrivate(privateKey, &K);
+    kem_decrypt(fnOut, fnIn, &K);
+    rsa_shredKey(&K);
+    
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     /* define long options */
     static struct option long_opts[] = {
