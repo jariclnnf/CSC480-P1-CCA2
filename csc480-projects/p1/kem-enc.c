@@ -150,6 +150,27 @@ int _decrypt(char* fnOut, char* fnIn, char* fnKey){
     return 0;
 }
 
+int generate(char* fnOut, size_t nBits){
+    
+    char* fPub = malloc(strlen(fnOut) + 5);
+    FILE* outPrivate = fopen(fnOut, "w");
+    FILE* outPublic = fopen(fPub, "w");
+    
+    RSA_KEY K;
+    strcpy(fPub, fnOut);
+    strcat(fPub, ".pub");
+    
+    rsa_writePrivate(outPrivate, &K);
+    rsa_writePublic(outPublic, &K);
+    rsa_keyGen(nBits, &K);
+    rsa_shredKey(&K);
+    
+    fclose(outPrivate);
+    fclose(outPublic);
+    
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     /* define long options */
     static struct option long_opts[] = {
@@ -217,13 +238,11 @@ int main(int argc, char *argv[]) {
     /* TODO: finish this off.  Be sure to erase sensitive data
      * like private keys when you're done with them (see the
      * rsa_shredKey function). */
-    switch (mode) {
-        case ENC:
-        case DEC:
-        case GEN:
-        default:
-            return 1;
+     switch (mode) {
+        case ENC: _encrypt(fnOut, fnIn, fnKey);
+        case DEC: _decrypt(fnOut, fnIn, fnKey);
+        case GEN: generate(fnOut, nBits);
+        default: return 1;
     }
-    
     return 0;
 }
