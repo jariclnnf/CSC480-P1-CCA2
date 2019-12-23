@@ -145,6 +145,7 @@ int _decrypt(char* fnOut, char* fnIn, char* fnKey){
     rsa_readPrivate(privateKey, &K);
     kem_decrypt(fnOut, fnIn, &K);
     rsa_shredKey(&K);
+    fclose(privateKey);
     
     return 0;
 }
