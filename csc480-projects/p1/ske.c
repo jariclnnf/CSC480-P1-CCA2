@@ -165,11 +165,48 @@ size_t ske_decrypt(unsigned char* outBuf, unsigned char* inBuf, size_t len,
 	 * Oh, and also, return -1 if the ciphertext is found invalid.
 	 * Otherwise, return the number of bytes written.  See aes-example.c
 	 * for how to do basic decryption. */
-	return 0;
+
+	 unsigned char hMac[HM_LEN];
+	 unsigned char cipher[cal]; // storing the cipher text
+	 unsigned char iv[16]; //16 length
+	 EVP_CIPHER_CTX* cipher_ctx = EVP_CIPHER_CTX_new();
+
+	 HMAC(EVP_sha256(), K->hmacKey, HM_LEN, inBuf, len-HM_LEN, hMac, NULL);
+
+	 for(int i=0; i<HM_LEN; i++){
+	    if(hMac[i] !=inBuf[len- HM_LEN +1]){
+	        return -1;
+	    }
+	 }
+
+
+	 memcpy(iv, inBuf, 16);
+
+	 int cal = len-HM_LEN-16;
+
+	 for(int i=0; i< cal; i++){
+	    cipher[i] = inBuf(i+16);
+	 }
+
+
+	if(1 != EVP_DecryptInit_ex(cipher_ctx, EVP_aes_256_ctr(), 0, K->aesKey, iv)) { //error check
+		ERR_print_errors_fp(stderr);
+	}
+
+	size_t cipher_Len = cal;
+
+	int result = 0;
+	if(1 != EVP_DecryptUpdate(cipher_ctx, outBuf, &nWritten, cipher, cipher_Len)) { //if error occurs, show error
+		ERR_print_errors_fp(stderr);
+	}
+
+
+	return result;
 }
 size_t ske_decrypt_file(const char* fnout, const char* fnin,
 		SKE_KEY* K, size_t offset_in)
 {
 	/* TODO: write this. */
+
 	return 0;
 }
