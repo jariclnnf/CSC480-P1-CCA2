@@ -119,9 +119,44 @@ size_t ske_encrypt_file(const char* fnout, const char* fnin,
 
 	struct stat statBuf;
 
+	if(fstat(fdin, &statBuf) == -1 || statBuf.st_size == 0) { 
+		printf('error');
+		return -1; 
+	}
+
+	size_t fdinLen = strlen(pa) + 1;
+	size_t ciphertextLen = ske_getOutputLen(fdinLen);
+
+	unsigned char* ciphertext = malloc(ciphertextLen+1);
 	
+	char freeIV = 0;
+	if(IV == NULL) { 
+		IV = malloc(16);
+		randBytes(IV, 16); 
+		freeIV = 1;
+	}
 
+	ssize_t encryptLen = ske_encrypt(ciphertext, (unsigned char*)pa, fdinLen, K, IV);
 
+	if(encryptLen == -1){
+		printf("Failed to encrypt\n");
+	}
+
+	lseek(fdout, offset_out, SEEK_SET);
+	ssize_t written = write(fdout, ciphertext, encryptLen);
+	if(written == -1){
+		printf("Failed to write to file\n");
+	}
+
+	munmap(pa, statBuf.st_size);
+	free(ciphertext);
+	if(freeIV > 0){
+		free(IV);
+	}
+	close(fdin);
+	close(fdout);
+	return 0;
+	
 }
 size_t ske_decrypt(unsigned char* outBuf, unsigned char* inBuf, size_t len,
 		SKE_KEY* K)
