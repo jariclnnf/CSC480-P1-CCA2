@@ -207,6 +207,41 @@ size_t ske_decrypt_file(const char* fnout, const char* fnin,
 		SKE_KEY* K, size_t offset_in)
 {
 	/* TODO: write this. */
+    unsigned char *re_ans;
+
+    int file_input = open(fnin, O_RDONLY); // read only;
+    int file_output = open(fnout, O_CREAT | O_RDWR, S_IRWXU); //read write
+
+    if(file_input == -1 || file_output == -1) {
+        return -1;
+    } //check if errors occur
+
+    struct stat statBuf;
+    if(fstat(file_input, &statBuf) == -1 || statBuf.st_size == 0) {  //check buffer state
+        return -1;
+     }
+
+    re_ans = mmap(NULL, statBuf.st_size, PROT_READ, MAP_PRIVATE, file_input, offset_in);
+    if(re_ans == MAP_Failed) {  // check state
+        return -1;
+    }
+
+    char* plain = malloc(statBuf.st_size - 16 - HM_LEN - offset_in);
+
+    //call ske_decrypt to decrypt
+    ske_decrypt((unsigned char*)plain, re_ans, statBuf.st_size - offset_in, K);
+
+    FILE *writeF = fopen(fnout, "w");
+    if(writeF == NULL){
+        return -1;
+
+    }
+    else{
+        fputs(plain, writeF);
+        fclose(writeF);
+    }
+
+
 
 	return 0;
 }
