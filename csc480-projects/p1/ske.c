@@ -47,6 +47,22 @@ int ske_keyGen(SKE_KEY* K, unsigned char* entropy, size_t entLen)
 		}
 		free(outBuf64);
 	 }
+	 // entropy is null
+	 else{
+		unsigned char* outBuf32aes ;
+		outBuf32hmac = malloc(32);
+		outBuf32aes  = malloc(32);
+		randBytes(outBuf_32_hmac, 32);
+		randBytes(outBuf_32_aes , 32);
+
+		for(int j = 0; i < 32; i++) {
+			K->hmacKey[j] = outBuf32hmac[j];
+			K->aesKey[j]  = outBuf32aes[j] ;
+		}
+
+		free(outBuf32hmac);
+		free(outBuf32aes);
+	 }
 	return 0;
 }
 size_t ske_getOutputLen(size_t inputLen)
